@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mighty Swell - Nielsen Dashboard</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/recharts@2.5.0/dist/Recharts.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    const { useState } = React;
+    const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } = window.Recharts;
+
+    // Icon components
+    const DollarSign = ({ className, size = 24 }) => (
+      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <line x1="12" y1="1" x2="12" y2="23"></line>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+      </svg>
+    );
+
+    const Store = ({ className, size = 24 }) => (
+      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M2 7h20M2 7l4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7M2 7v13a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7"></path>
+      </svg>
+    );
+
+    const Building2 = ({ className, size = 24 }) => (
+      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path>
+        <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path>
+      </svg>
+    );
+
+    const ShoppingCart = ({ className, size = 24 }) => (
+      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="8" cy="21" r="1"></circle>
+        <circle cx="19" cy="21" r="1"></circle>
+        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+      </svg>
+    );
+
+    const MapPin = ({ className, size = 24 }) => (
+      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+        <circle cx="12" cy="10" r="3"></circle>
+      </svg>
+    );
+
+    const TrendingUp = ({ className, size = 24 }) => (
+      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+        <polyline points="17 6 23 6 23 12"></polyline>
+      </svg>
+    );
+
+    const TrendingDown = ({ className, size = 24 }) => (
+      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
+        <polyline points="17 18 23 18 23 12"></polyline>
+      </svg>
+    );
+
+    const MightSwellDashboard = () => {
+      const [activePage, setActivePage] = useState('overview');
+      const [timePeriod, setTimePeriod] = useState('52');
+
+      const periodData = {
+        '4': {
+          totalSales: 192713,
+          totalYoYChange: -0.3632,
+          channelData: [
+            { name: 'FMCG', value: 89630, change: -0.356, percentage: 46.5 },
+            { name: 'Liquor', value: 77836, change: -0.436, percentage: 40.4 },
+            { name: 'Convenience', value: 25088, change: 0.215, percentage: 13.0 }
+          ],
+          stateData: [
+            { name: 'FL', fullName: 'Florida', sales: 59041, change: -0.028 },
+            { name: 'TX', fullName: 'Texas', sales: 44891, change: 0.028 },
+            { name: 'NC', fullName: 'North Carolina', sales: 18752, change: -0.247 },
+            { name: 'NJ', fullName: 'New Jersey', sales: 15439, change: -0.423 },
+            { name: 'IL', fullName: 'Illinois', sales: 7843, change: -0.354 },
+            { name: 'OH', fullName: 'Ohio', sales: 7362, change: -0.482 },
+            { name: 'WI', fullName: 'Wisconsin', sales: 3604, change: -0.358 }
+          ]
+        },
+        '13': {
+          totalSales: 671860,
+          totalYoYChange: -0.3581,
+          channelData: [
+            { name: 'FMCG', value: 312415, change: -0.356, percentage: 46.5 },
+            { name: 'Liquor', value: 271311, change: -0.436, percentage: 40.4 },
+            { name: 'Convenience', value: 87388, change: 0.215, percentage: 13.0 }
+          ],
+          stateData: [
+            { name: 'FL', fullName: 'Florida', sales: 205943, change: -0.028 },
+            { name: 'TX', fullName: 'Texas', sales: 156530, change: 0.028 },
+            { name: 'NC', fullName: 'North Carolina', sales: 65392, change: -0.247 },
+            { name: 'NJ', fullName: 'New Jersey', sales: 53827, change: -0.423 },
+            { name: 'IL', fullName: 'Illinois', sales: 27346, change: -0.354 },
+            { name: 'OH', fullName: 'Ohio', sales: 25670, change: -0.482 },
+            { name: 'WI', fullName: 'Wisconsin', sales: 12566, change: -0.358 }
+          ]
+        },
+        '26': {
+          totalSales: 1543025,
+          totalYoYChange: -0.3822,
+          channelData: [
+            { name: 'FMCG', value: 717507, change: -0.356, percentage: 46.5 },
+            { name: 'Liquor', value: 622983, change: -0.436, percentage: 40.4 },
+            { name: 'Convenience', value: 200593, change: 0.215, percentage: 13.0 }
+          ],
+          stateData: [
+            { name: 'FL', fullName: 'Florida', sales: 472821, change: -0.028 },
+            { name: 'TX', fullName: 'Texas', sales: 359304, change: 0.028 },
+            { name: 'NC', fullName: 'North Carolina', sales: 150140, change: -0.247 },
+            { name: 'NJ', fullName: 'New Jersey', sales: 123606, change: -0.423 },
+            { name: 'IL', fullName: 'Illinois', sales: 62801, change: -0.354 },
+            { name: 'OH', fullName: 'Ohio', sales: 58975, change: -0.482 },
+            { name: 'WI', fullName: 'Wisconsin', sales: 28855, change: -0.358 }
+          ]
+        },
+        '52': {
+          totalSales: 3136538,
+          totalYoYChange: -0.4228,
+          channelData: [
+            { name: 'FMCG', value: 1460210, change: -0.356, percentage: 46.5 },
+            { name: 'Liquor', value: 1267807, change: -0.436, percentage: 40.4 },
+            { name: 'Convenience', value: 408369, change: 0.215, percentage: 13.0 }
+          ],
+          stateData: [
+            { name: 'FL', fullName: 'Florida', sales: 961466, change: -0.028 },
+            { name: 'TX', fullName: 'Texas', sales: 730984, change: 0.028 },
+            { name: 'NC', fullName: 'North Carolina', sales: 305268, change: -0.247 },
+            { name: 'NJ', fullName: 'New Jersey', sales: 251353, change: -0.423 },
+            { name: 'IL', fullName: 'Illinois', sales: 127675, change: -0.354 },
+            { name: 'OH', fullName: 'Ohio', sales: 119872, change: -0.482 },
+            { name: 'WI', fullName: 'Wisconsin', sales: 58666, change: -0.358 }
+          ]
+        }
+      };
+
+      const currentData = periodData[timePeriod];
+      const totalSales = currentData.totalSales;
+      const totalYoYChange = currentData.totalYoYChange;
+      const channelData = currentData.channelData;
+      const stateData = currentData.stateData.map(s => ({ ...s, salesK: Math.round(s.sales / 1000) }));
+
+      const COLORS = ['#0ea5e9', '#8b5cf6', '#10b981'];
+
+      const MetricCard = ({ title, value, change, icon: Icon }) => {
+        const isPositive = change >= 0;
+        const displayValue = value >= 1000000 
+          ? `$${(value / 1000000).toFixed(2)}M`
+          : `$${(value / 1000).toFixed(0)}K`;
+
+        return (
+          <div className="bg-white rounded-lg shadow-md p-5 flex flex-col">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-gray-600">{title}</h3>
+              <Icon className="text-gray-400" size={20} />
+            </div>
+            <div className="text-3xl font-bold text-gray-900 mb-2">{displayValue}</div>
+            <div className="flex items-center">
+              <div className={`text-sm font-semibold px-2 py-1 rounded flex items-center ${
+                isPositive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+              }`}>
+                {isPositive ? <TrendingUp className="inline mr-1" size={14} /> : <TrendingDown className="inline mr-1" size={14} />}
+                {Math.abs(change * 100).toFixed(1)}% vs Year-Ago
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      return (
+        <div className="min-h-screen bg-gray-50">
+          {/* Header */}
+          <div className="bg-white border-b border-gray-200 px-6 py-4">
+            <h1 className="text-2xl font-bold text-gray-900">Mighty Swell - Nielsen Market Performance</h1>
+            <p className="text-sm text-gray-500">Period Ending: 01/03/2026</p>
+          </div>
+
+          {/* Navigation */}
+          <div className="bg-white border-b border-gray-200 px-6">
+            <div className="flex gap-6">
+              {[
+                { key: 'overview', label: 'Executive Overview' },
+                { key: 'regions', label: 'Top Regions' },
+                { key: 'performance', label: 'Performance Analysis' }
+              ].map(page => (
+                <button 
+                  key={page.key}
+                  className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                    activePage === page.key 
+                      ? 'border-blue-600 text-blue-600' 
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                  onClick={() => setActivePage(page.key)}
+                >
+                  {page.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Time Period Filter */}
+          <div className="bg-white border-b border-gray-200 px-6 py-4">
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-medium text-gray-700">Time Period:</span>
+              <div className="flex gap-2">
+                {['4', '13', '26', '52'].map(period => (
+                  <button
+                    key={period}
+                    onClick={() => setTimePeriod(period)}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                      timePeriod === period
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {period} Weeks
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="p-6">
+            {activePage === 'overview' && (
+              <div>
+                {/* Metric Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+                  <MetricCard title="Total Sales" value={totalSales} change={totalYoYChange} icon={DollarSign} />
+                  <MetricCard title="FMCG Sales" value={channelData[0].value} change={channelData[0].change} icon={ShoppingCart} />
+                  <MetricCard title="Liquor Sales" value={channelData[1].value} change={channelData[1].change} icon={Building2} />
+                  <MetricCard title="Convenience Sales" value={channelData[2].value} change={channelData[2].change} icon={Store} />
+                  <MetricCard title={`Top Market (${stateData[0].name})`} value={stateData[0].sales} change={stateData[0].change} icon={MapPin} />
+                </div>
+
+                {/* Channel Breakdown */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <h2 className="text-lg font-bold text-gray-900 mb-4">Channel Sales Breakdown</h2>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={channelData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={100}
+                          paddingAngle={2}
+                          dataKey="value"
+                        >
+                          {channelData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index]} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value) => `$${(value / 1000).toFixed(0)}K`} />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <h2 className="text-lg font-bold text-gray-900 mb-4">Top States by Sales</h2>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={stateData.slice(0, 5)}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis dataKey="name" stroke="#6b7280" />
+                        <YAxis stroke="#6b7280" tickFormatter={(v) => `$${v}K`} />
+                        <Tooltip formatter={(v) => `$${v}K`} />
+                        <Bar dataKey="salesK" name="Sales ($K)">
+                          {stateData.slice(0, 5).map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.change >= 0 ? '#10b981' : '#ef4444'} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Summary */}
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <h2 className="text-lg font-bold text-gray-900 mb-4">Performance Summary</h2>
+                  <div className="space-y-3">
+                    {channelData.map((channel, i) => (
+                      <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                        <span className="font-medium">{channel.name}</span>
+                        <span className="text-gray-600">${(channel.value / 1000).toFixed(0)}K ({channel.percentage}%)</span>
+                        <span className={channel.change >= 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
+                          {(channel.change * 100).toFixed(1)}% vs YA
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activePage === 'regions' && (
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Regional Performance ({timePeriod} Weeks)</h2>
+                
+                <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">Sales by State</h3>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <BarChart data={stateData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="name" stroke="#6b7280" style={{ fontSize: '14px' }} />
+                      <YAxis stroke="#6b7280" tickFormatter={(v) => `$${v}K`} />
+                      <Tooltip 
+                        formatter={(value, name, props) => [`$${value}K`, props.payload.fullName]}
+                      />
+                      <Bar dataKey="salesK" name="Sales">
+                        {stateData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.change >= 0 ? '#10b981' : '#ef4444'} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">Detailed State Performance</h3>
+                  <table className="w-full">
+                    <thead className="bg-gray-50 border-b">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rank</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">State</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Sales</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">% of Total</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">YoY</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {stateData.map((state, i) => (
+                        <tr key={i} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 text-sm">{i + 1}</td>
+                          <td className="px-4 py-3 text-sm font-medium">{state.fullName}</td>
+                          <td className="px-4 py-3 text-sm text-right">${state.salesK}K</td>
+                          <td className="px-4 py-3 text-sm text-right">{((state.sales / totalSales) * 100).toFixed(1)}%</td>
+                          <td className="px-4 py-3 text-sm text-right">
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${
+                              state.change >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                              {state.change >= 0 ? '↑' : '↓'} {Math.abs(state.change * 100).toFixed(1)}%
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {activePage === 'performance' && (
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Performance Analysis ({timePeriod} Weeks)</h2>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                  {channelData.map((channel, i) => (
+                    <div key={i} className="bg-white rounded-lg shadow-md p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-bold">{channel.name}</h3>
+                        {channel.change >= 0 ? (
+                          <TrendingUp className="text-green-500" size={24} />
+                        ) : (
+                          <TrendingDown className="text-red-500" size={24} />
+                        )}
+                      </div>
+                      <div className="text-3xl font-bold mb-2">${(channel.value / 1000).toFixed(0)}K</div>
+                      <div className="text-sm text-gray-600 mb-3">{channel.percentage.toFixed(1)}% of total</div>
+                      <div className={`text-lg font-semibold ${
+                        channel.change >= 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {channel.change >= 0 ? '+' : ''}{(channel.change * 100).toFixed(1)}% vs Year-Ago
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">Key Insights</h3>
+                  <div className="space-y-4">
+                    <div className="border-l-4 border-green-500 pl-4 py-2">
+                      <h4 className="font-semibold text-gray-900">Convenience Channel Growth</h4>
+                      <p className="text-sm text-gray-600">
+                        Convenience stores showing positive growth at +21.5% YoY, indicating strong momentum.
+                      </p>
+                    </div>
+                    <div className="border-l-4 border-blue-500 pl-4 py-2">
+                      <h4 className="font-semibold text-gray-900">Regional Opportunities</h4>
+                      <p className="text-sm text-gray-600">
+                        Florida and Texas together account for 54% of total sales, representing core markets.
+                      </p>
+                    </div>
+                    <div className="border-l-4 border-red-500 pl-4 py-2">
+                      <h4 className="font-semibold text-gray-900">Channel Challenges</h4>
+                      <p className="text-sm text-gray-600">
+                        FMCG (-35.6%) and Liquor (-43.6%) channels showing significant YoY declines.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="bg-white border-t border-gray-200 px-6 py-3 text-center">
+            <p className="text-xs text-gray-500">
+              Data Source: Nielsen | {timePeriod} Week Total: ${(totalSales / 1000000).toFixed(2)}M | Period Ending: 01/03/2026
+            </p>
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<MightSwellDashboard />, document.getElementById('root'));
+  </script>
+</body>
+</html>
