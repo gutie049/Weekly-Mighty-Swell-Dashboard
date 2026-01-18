@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mighty Swell Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+  <div id="app"></div>
+  <script>
+    const data = {
+      "52": {
+        total: 3136537,
+        yoy: -0.4228,
+        channels: [
+          { name: "FMCG", val: 1460210, chg: -0.3557, pct: 46.6, color: "#0ea5e9" },
+          { name: "Liquor", val: 1267807, chg: -0.4362, pct: 40.4, color: "#8b5cf6" },
+          { name: "Convenience", val: 408369, chg: 0.2146, pct: 13.0, color: "#10b981" }
+        ],
+        states: [
+          { n: "FL", full: "Florida", s: 961466, c: -0.2547 },
+          { n: "TX", full: "Texas", s: 730984, c: -0.3404 },
+          { n: "NC", full: "North Carolina", s: 305268, c: -0.3252 },
+          { n: "NJ", full: "New Jersey", s: 251353, c: -0.2886 },
+          { n: "IL", full: "Illinois", s: 127675, c: -0.3811 },
+          { n: "OH", full: "Ohio", s: 119872, c: -0.4028 },
+          { n: "WI", full: "Wisconsin", s: 58666, c: -0.3439 }
+        ],
+        products: [
+          { name: "Original Variety 12pk", sales: 1235308, units: 80649, yoy: -0.177, price: 15.32, acv: 0.948 },
+          { name: "Keep It Weird 12pk", sales: 803540, units: 52439, yoy: -0.227, price: 15.32, acv: 0.918 },
+          { name: "Tropic 12pk", sales: 682582, units: 47263, yoy: -0.158, price: 14.44, acv: 0.903 },
+          { name: "Techniflavor 12pk", sales: 333254, units: 22987, yoy: -0.384, price: 14.50, acv: 0.817 },
+          { name: "Cherry Lime 6pk", sales: 59294, units: 5757, yoy: -0.378, price: 10.30, acv: 0.481 },
+          { name: "Blackberry 6pk", sales: 12790, units: 1328, yoy: -0.616, price: 9.63, acv: 0.163 },
+          { name: "Peach 6pk", sales: 6334, units: 633, yoy: -0.744, price: 10.01, acv: 0.120 },
+          { name: "Watermelon Mint 6pk", sales: 3435, units: 343, yoy: -0.698, price: 10.01, acv: 0.088 }
+        ]
+      }
+    };
+    
+    let page = "overview";
+    let period = "52";
+    
+    function fmt(v) {
+      return v >= 1000000 ? "$" + (v/1000000).toFixed(2) + "M" : "$" + (v/1000).toFixed(0) + "K";
+    }
+    
+    function card(title, value, change) {
+      const isPos = change >= 0;
+      const arrow = isPos ? "↑" : "↓";
+      const colorClass = isPos ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700";
+      return `<div class="bg-white rounded-lg shadow-md p-5">
+        <h3 class="text-sm font-medium text-gray-600 mb-3">${title}</h3>
+        <div class="text-3xl font-bold text-gray-900 mb-2">${fmt(value)}</div>
+        <div class="text-sm font-semibold px-2 py-1 rounded inline-block ${colorClass}">
+          ${arrow} ${Math.abs(change * 100).toFixed(1)}% vs YA
+        </div>
+      </div>`;
+    }
+    
+    function productsPage() {
+      const d = data[period];
+      const total = d.products.reduce((sum, p) => sum + p.sales, 0);
+      
+      return `<h2 class="text-2xl font-bold mb-6">Product Performance (${period} Weeks)</h2>
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h3 class="text-lg font-bold mb-4">All Products</h3>
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Sales</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Units</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">YoY</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y">
+              ${d.products.map(p => `
+                <tr class="hover:bg-gray-50">
+                  <td class="px-4 py-3 text-sm font-medium">${p.name}</td>
+                  <td class="px-4 py-3 text-sm text-right">${fmt(p.sales)}</td>
+                  <td class="px-4 py-3 text-sm text-right">${p.units.toLocaleString()}</td>
+                  <td class="px-4 py-3 text-sm text-right">
+                    <span class="px-2 py-1 rounded text-xs font-medium ${p.yoy >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                      ${p.yoy >= 0 ? '↑' : '↓'} ${Math.abs(p.yoy * 100).toFixed(1)}%
+                    </span>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+    
+    function overviewPage() {
+      const d = data[period];
+      return `<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        ${card("Total Sales", d.total, d.yoy)}
+        ${card("FMCG", d.channels[0].val, d.channels[0].chg)}
+        ${card("Liquor", d.channels[1].val, d.channels[1].chg)}
+      </div>`;
+    }
+    
+    function regionsPage() {
+      const d = data[period];
+      return `<h2 class="text-2xl font-bold mb-6">Top States</h2>
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">State</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Sales</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">YoY</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y">
+              ${d.states.map(st => `
+                <tr class="hover:bg-gray-50">
+                  <td class="px-4 py-3 text-sm font-medium">${st.full}</td>
+                  <td class="px-4 py-3 text-sm text-right">${fmt(st.s)}</td>
+                  <td class="px-4 py-3 text-sm text-right">
+                    <span class="px-2 py-1 rounded text-xs font-medium ${st.c >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                      ${st.c >= 0 ? '↑' : '↓'} ${Math.abs(st.c * 100).toFixed(1)}%
+                    </span>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+    
+    function performancePage() {
+      const d = data[period];
+      return `<h2 class="text-2xl font-bold mb-6">Performance Analysis</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          ${d.channels.map(ch => `
+            <div class="bg-white rounded-lg shadow-md p-6">
+              <h3 class="text-lg font-bold mb-4">${ch.name}</h3>
+              <div class="text-3xl font-bold mb-2">${fmt(ch.val)}</div>
+              <div class="text-lg font-semibold ${ch.chg >= 0 ? 'text-green-600' : 'text-red-600'}">
+                ${ch.chg >= 0 ? '+' : ''}${(ch.chg * 100).toFixed(1)}% vs YA
+              </div>
+            </div>
+          `).join('')}
+        </div>`;
+    }
+    
+    function render() {
+      const d = data[period];
+      
+      let content = "";
+      if (page === "overview") content = overviewPage();
+      else if (page === "products") content = productsPage();
+      else if (page === "regions") content = regionsPage();
+      else if (page === "performance") content = performancePage();
+      
+      document.getElementById("app").innerHTML = `
+        <div class="min-h-screen">
+          <div class="bg-white border-b px-6 py-4">
+            <h1 class="text-2xl font-bold">Mighty Swell - Nielsen Dashboard</h1>
+            <p class="text-sm text-gray-500">Period Ending: 01/03/2026</p>
+          </div>
+          
+          <div class="bg-white border-b px-6">
+            <div class="flex gap-6">
+              <button onclick="setPage('overview')" class="py-3 px-1 border-b-2 font-medium text-sm ${page === 'overview' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'}">
+                Executive Overview
+              </button>
+              <button onclick="setPage('products')" class="py-3 px-1 border-b-2 font-medium text-sm ${page === 'products' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'}">
+                Products
+              </button>
+              <button onclick="setPage('regions')" class="py-3 px-1 border-b-2 font-medium text-sm ${page === 'regions' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'}">
+                Top Regions
+              </button>
+              <button onclick="setPage('performance')" class="py-3 px-1 border-b-2 font-medium text-sm ${page === 'performance' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'}">
+                Performance
+              </button>
+            </div>
+          </div>
+          
+          <div class="p-6">${content}</div>
+          
+          <div class="bg-white border-t px-6 py-3 text-center">
+            <p class="text-xs text-gray-500">Nielsen | ${period} Week Total: ${fmt(d.total)} | 01/03/2026</p>
+          </div>
+        </div>
+      `;
+    }
+    
+    window.setPage = function(p) {
+      page = p;
+      render();
+    };
+    
+    window.setPeriod = function(pr) {
+      period = pr;
+      render();
+    };
+    
+    render();
+  </script>
+</body>
+</html>
